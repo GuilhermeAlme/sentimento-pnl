@@ -19,6 +19,14 @@ with open('resultados/exploracao.txt', 'w', encoding='utf-8') as arq:
     print(df[df['sentimento']=='positivo']['texto'].head(3), file=arq)
     print(df[df['sentimento']=='negativo']['texto'].head(3), file=arq)
 
+def preprocessar(texto, remover_stopwords):
+     texto = texto.lower()
+     palavras = re.findall(r"[a-záàâãéêíóôõúçü]+", texto)
+     stopwords = ['a', 'o', 'e', 'de', 'da', 'do', 'que', 'em', 'para', 'com', 'uma', 'um', 'os', 'as', 'se']
+     if remover_stopwords:
+         palavras = [p for p in palavras if p not in stopwords]
+     return ' '.join(palavras)
+
 
 
 
