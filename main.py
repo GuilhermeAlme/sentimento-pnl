@@ -59,6 +59,44 @@ print(len(linhas))
 comparacao = pd.DataFrame(linhas, columns=['config', 'stopwords', 'vetorizador', 'vocabulario', 'acc_cv_media', 'acc_cv_desvio', 'f1_cv_media', 'f1_cv_desvio'])
 print(comparacao)
 comparacao.to_csv('resultados/comparacao.csv', index=False)
+import numpy as np
+from sklearn.metrics import confusion_matrix, classification_report
+nome, sw, tipo, coluna, vetorizador = configs[0]
+modelo_final = Pipeline([('v', vetorizador), ('m', LogisticRegression(max_iter=1000))])
+modelo_final.fit(df.loc[idx_treino, coluna], y.loc[idx_treino])
+prev = modelo_final.predict(df.loc[idx_teste, coluna])
+print(confusion_matrix(y.loc[idx_teste], prev))
+print(classification_report(y.loc[idx_teste], prev))
+rel = classification_report(y.loc[idx_teste], prev)
+with open('resultados/relatorio_classificacao.txt', 'w', encoding='utf-8') as arq:
+    print(rel, file=arq)
+pd.DataFrame(confusion_matrix(y.loc[idx_teste], prev)).to_csv('resultados/matriz_confusao.csv', index=False)
+prob = modelo_final.predict_proba(df.loc[idx_teste, coluna])
+i_pos = list(modelo_final['m'].classes_).index('positivo')
+erros = df.loc[idx_teste, ['texto']].copy()
+erros['real'] = y.loc[idx_teste].values
+erros['previsto'] = prev
+erros['probabilidade'] = prob[:, i_pos]
+erros = erros[erros['real'] != erros['previsto']]
+erros.to_csv('resultados/erros.csv', index=False)
+print(len(erros))
+palavras = modelo_final['v'].get_feature_names_out()
+coef = modelo_final['m'].coef_[0]
+ordem = np.argsort(coef)
+linhas_pal = [['positivo', palavras[i], coef[i]] for i in ordem[-10:][::-1]]
+linhas_pal = linhas_pal + [['negativo', palavras[i], coef[i]] for i in ordem[:10]]
+pd.DataFrame(linhas_pal, columns=['direcao', 'palavra', 'coeficiente']).to_csv('resultados/palavras_influentes.csv', index=False)
+dificeis = pd.read_csv('data/casos_dificeis.csv')
+dificeis['texto_pp'] = [preprocessar(t, False) for t in dificeis['texto']]
+preds = modelo_final.predict(dificeis['texto_pp'])
+prob_d = modelo_final.predict_proba(dificeis['texto_pp'])[:, i_pos]
+saida = pd.DataFrame({'texto': dificeis['texto'], 'tipo': dificeis['tipo'], 'esperado': dificeis['sentimento_esperado'], 'previsto': preds, 'prob_positivo': prob_d})
+print(saida)
+saida.to_csv('resultados/casos_dificeis_predicoes.csv', index=False)
+
+
+
+
 
 
 
