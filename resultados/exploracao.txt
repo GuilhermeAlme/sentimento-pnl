@@ -1,0 +1,17 @@
+Total de linhas: 260
+sentimento
+negativo    130
+positivo    130
+Name: count, dtype: int64
+sentimento
+negativo    7.707692
+positivo    7.700000
+Name: n_palavras, dtype: float64
+1                             Adorei o aplicativo, show
+4       Adorei o atendimento, nota máxima para a equipe
+10    Ficou lindo na sala, combinou perfeitamente co...
+Name: texto, dtype: str
+0             Detestei o fone, ruim, nunca mais compro
+2                          A embalagem não é excelente
+3    Cheguei animado, mas me arrependi, tudo estava...
+Name: texto, dtype: str
